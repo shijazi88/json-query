@@ -149,7 +149,21 @@ public class GenericJsqlSpecification<T, V> implements Specification<T>
                     }
                     else
                     {
-                        return root.get(field).in(value);
+                        final Class<? extends Object> type = root.get(field).getJavaType();
+                        switch (type.getSimpleName())
+                        {
+                            case "Integer":
+                               return root.<Integer>get(field).in((List<Integer>)value);
+                            case "Long":
+                                return root.<Long>get(field).in((List<Long>)value);
+                            case "Double":
+                                return root.<Double>get(field).in((List<Double>)value);
+                            case "BigDecimal":
+                                return root.<BigDecimal>get(field).in((List<BigDecimal>)value);                            
+                            case "String":
+                                return root.get(field).in(value);
+
+                        }
                     }
 
                 case IS_NULL:

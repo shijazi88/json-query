@@ -5,15 +5,12 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class CustomJsqlVisitor<T,V>
 {
-
     private GenericJsqlSpecBuilder<T,V> builder;
-
 
     public CustomJsqlVisitor()
     {
         builder = new GenericJsqlSpecBuilder<T,V>();
     }
-
 
     public Specification<T> visit(JsonQuery node)
     {
@@ -22,7 +19,7 @@ public class CustomJsqlVisitor<T,V>
 
     public String toSql(JsonQuery node)
     {
-        return "";
+        return "Not implemented yet.. :)";
     }
 
 }

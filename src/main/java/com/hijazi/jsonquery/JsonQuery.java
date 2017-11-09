@@ -6,26 +6,22 @@ import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-
-@JsonInclude(value=Include.NON_NULL)
+@JsonInclude(value = Include.NON_NULL)
 public class JsonQuery<V>
 {
-    // condition
-     String field;
+    String field;
     private SearchOperation operator;
 
-    // condition or operation
     private V value;
-    
+
     private V toValue;
 
     private String dateFormat;
-    
+
     private boolean leaf;
     private List<JsonQuery<V>> conditions;
-    
-    
-    
+
+
     public V getToValue()
     {
         return toValue;
@@ -76,13 +72,13 @@ public class JsonQuery<V>
         this.value = builder.value;
         this.toValue = builder.toValue;
         this.leaf = builder.leaf;
-        this.dateFormat= builder.dateFormat;
+        this.dateFormat = builder.dateFormat;
         this.conditions = builder.conditions;
     }
-    
+
+
     public JsonQuery()
-    {
-    }
+    {}
 
 
     /**
@@ -119,6 +115,8 @@ public class JsonQuery<V>
             this.field = field;
             return this;
         }
+
+
         public Builder<V> withDateFormat(String dateFormat)
         {
             this.dateFormat = dateFormat;
@@ -131,42 +129,56 @@ public class JsonQuery<V>
             this.operator = operator;
             return this;
         }
+
+
         public Builder<V> and()
         {
             this.operator = SearchOperation.AND;
             return this;
         }
+
+
         public Builder<V> or()
         {
             this.operator = SearchOperation.OR;
             return this;
         }
+
+
         public Builder<V> like()
         {
             this.operator = SearchOperation.LIKE;
             return this;
         }
+
+
         public Builder<V> greaterVhank()
         {
             this.operator = SearchOperation.GREATER_THAN;
             return this;
         }
+
+
         public Builder<V> lessVhan()
         {
             this.operator = SearchOperation.LESS_THAN;
             return this;
         }
+
+
         public Builder<V> equal()
         {
             this.operator = SearchOperation.EQUAL;
             return this;
         }
 
+
         public Builder<V> withValue(V value)
         {
             this.value = value;
             return this;
         }
+
 
         public Builder<V> withToValue(V toValue)
         {
@@ -187,28 +199,35 @@ public class JsonQuery<V>
             this.conditions = conditions;
             return this;
         }
+
+
         public Builder<V> addCondition(JsonQuery<V> condition)
         {
-            if(this.conditions == null)
+            if (this.conditions == null)
                 this.conditions = new ArrayList<JsonQuery<V>>();
             this.conditions.add(condition);
             return this;
         }
-        public Builder<V> addDateCondition(String field,V value,SearchOperation operator,String dateFormat)
+
+
+        public Builder<V> addDateCondition(String field, V value, SearchOperation operator, String dateFormat)
         {
-            if(this.conditions == null)
+            if (this.conditions == null)
                 this.conditions = new ArrayList<JsonQuery<V>>();
-            
-            JsonQuery<V> condition=JsonQuery.builder().withConditions(null).withLeaf(true).withField(field).withValue(value).withOperator(operator).withDateFormat(dateFormat).build();
+
+            JsonQuery<V> condition =
+                JsonQuery.builder().withConditions(null).withLeaf(true).withField(field).withValue(value).withOperator(operator).withDateFormat(dateFormat).build();
             this.conditions.add(condition);
             return this;
         }
-        public Builder<V> addSimpleCondition(String field,V value,SearchOperation operator)
+
+
+        public Builder<V> addSimpleCondition(String field, V value, SearchOperation operator)
         {
-            if(this.conditions == null)
+            if (this.conditions == null)
                 this.conditions = new ArrayList<JsonQuery<V>>();
-            
-            JsonQuery<V> condition=JsonQuery.builder().withConditions(null).withLeaf(true).withField(field).withValue(value).withOperator(operator).build();
+
+            JsonQuery<V> condition = JsonQuery.builder().withConditions(null).withLeaf(true).withField(field).withValue(value).withOperator(operator).build();
             this.conditions.add(condition);
             return this;
         }
