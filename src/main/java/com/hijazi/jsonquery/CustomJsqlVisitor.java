@@ -17,7 +17,7 @@ public class CustomJsqlVisitor<T,V>
         return builder.createSpecification(node);
     }
 
-    public String toSql(JsonQuery node)
+    public String toSql(JsonQuery<V> node)
     {
         return "Not implemented yet.. :)";
     }
