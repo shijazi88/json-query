@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -53,86 +54,100 @@ public class GenericJsqlSpecification<T, V> implements Specification<T>
     {
         try
         {
+            Path<T> p = null;
+            //check if child relation
+            if (field.contains("."))
+            {
+                String[] fields = field.split("\\.");
+                p = root.get(fields[0]);
+                field = fields[1];
+            }
+            else
+            {
+                p = root;
+            }
 
+            // check the operation
             switch (operator)
             {
                 case EQUAL:
                 {
-                    if (checkIfDate(root))
+                    if (checkIfDate(p))
                     {
                         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-                        return builder.equal(root.<Date>get(field), formatter.parse(value.toString()));
+                        return builder.equal(p.<Date>get(field), formatter.parse(value.toString()));
                     }
                     else
                     {
-                        return builder.equal(root.get(field), value);
+                        return builder.equal(p.get(field), value);
                     }
+
                 }
                 case NOT_EQUAL:
                 {
-                    if (checkIfDate(root))
+                    if (checkIfDate(p))
                     {
                         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-                        return builder.notEqual(root.<Date>get(field), formatter.parse(value.toString()));
+                        return builder.notEqual(p.<Date>get(field), formatter.parse(value.toString()));
                     }
                     else
                     {
-                        return builder.notEqual(root.get(field), value);
+                        return builder.notEqual(p.get(field), value);
                     }
                 }
                 case GREATER_THAN:
                 {
-                    if (checkIfDate(root))
+                    if (checkIfDate(p))
                     {
                         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-                        return builder.greaterThan(root.<Date>get(field), formatter.parse(value.toString()));
+                        return builder.greaterThan(p.<Date>get(field), formatter.parse(value.toString()));
                     }
                     else
                     {
-                        return builder.greaterThan(root.<String>get(field), value.toString());
+                        return builder.greaterThan(p.<String>get(field), value.toString());
                     }
                 }
                 case GREATER_THAN_OR_EQUAL:
                 {
-                    if (checkIfDate(root))
+                    if (checkIfDate(p))
                     {
                         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-                        return builder.greaterThanOrEqualTo(root.<Date>get(field), formatter.parse(value.toString()));
+                        return builder.greaterThanOrEqualTo(p.<Date>get(field), formatter.parse(value.toString()));
                     }
                     else
                     {
-                        return builder.greaterThanOrEqualTo(root.<String>get(field), value.toString());
+                        return builder.greaterThanOrEqualTo(p.<String>get(field), value.toString());
                     }
                 }
                 case LESS_THAN:
                 {
-                    if (checkIfDate(root))
+                    if (checkIfDate(p))
                     {
                         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-                        return builder.lessThan(root.<Date>get(field), formatter.parse(value.toString()));
+                        return builder.lessThan(p.<Date>get(field), formatter.parse(value.toString()));
                     }
                     else
                     {
-                        return builder.lessThan(root.<String>get(field), value.toString());
+                        return builder.lessThan(p.<String>get(field), value.toString());
                     }
                 }
                 case LESS_THAN_OR_EQUAL:
                 {
-                    if (checkIfDate(root))
+                    if (checkIfDate(p))
                     {
                         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-                        return builder.lessThanOrEqualTo(root.<Date>get(field), formatter.parse(value.toString()));
+                        return builder.lessThanOrEqualTo(p.<Date>get(field), formatter.parse(value.toString()));
                     }
                     else
                     {
-                        return builder.lessThanOrEqualTo(root.<String>get(field), value.toString());
+                        return builder.lessThanOrEqualTo(p.<String>get(field), value.toString());
                     }
                 }
                 case IN:
-                    if (checkIfDate(root))
+                    if (checkIfDate(p))
                     {
                         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-                        return root.<Date>get(field).in(((List) value).stream().map(x ->
+                        return p.<Date>get(field).in(((List) value).stream().map(x ->
 
                         {
                             try
@@ -149,32 +164,33 @@ public class GenericJsqlSpecification<T, V> implements Specification<T>
                     }
                     else
                     {
-                        final Class<? extends Object> type = root.get(field).getJavaType();
+                        final Class<? extends Object> type = p.get(field).getJavaType();
                         switch (type.getSimpleName())
                         {
                             case "Integer":
-                               return root.<Integer>get(field).in((List<Integer>)value);
+                                return p.<Integer>get(field).in((List<Integer>) value);
                             case "Long":
-                                return root.<Long>get(field).in((List<Long>)value);
+                                return p.<Long>get(field).in((List<Long>) value);
                             case "Double":
-                                return root.<Double>get(field).in((List<Double>)value);
+                                return p.<Double>get(field).in((List<Double>) value);
                             case "BigDecimal":
-                                return root.<BigDecimal>get(field).in((List<BigDecimal>)value);                            
+                                return p.<BigDecimal>get(field).in((List<BigDecimal>) value);
                             case "String":
-                                return root.get(field).in(value);
+                                return p.in(value);
 
                         }
                     }
 
                 case IS_NULL:
-                    return root.get(field).isNull();
+                    System.out.println(field);
+                    return p.isNull();
                 case IS_NOT_NULL:
-                    return root.get(field).isNotNull();
+                    return p.isNotNull();
                 case NOT_IN:
-                    if (checkIfDate(root))
+                    if (checkIfDate(p))
                     {
                         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-                        return builder.not(root.<Date>get(field).in(((List) value).stream().map(x ->
+                        return builder.not(p.<Date>get(field).in(((List) value).stream().map(x ->
 
                         {
                             try
@@ -191,34 +207,34 @@ public class GenericJsqlSpecification<T, V> implements Specification<T>
                     }
                     else
                     {
-                        return builder.not(root.get(field).in(value));
+                        return builder.not(p.in(value));
 
                     }
                 case BETWEEN:
-                    if (checkIfDate(root))
+                    if (checkIfDate(p))
                     {
                         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-                        return builder.between(root.<Date>get(field), formatter.parse(value.toString()), formatter.parse(toValue.toString()));
+                        return builder.between(p.<Date>get(field), formatter.parse(value.toString()), formatter.parse(toValue.toString()));
                     }
                     else
                     {
-                        final Class<? extends Object> type = root.get(field).getJavaType();
+                        final Class<? extends Object> type = p.get(field).getJavaType();
                         switch (type.getSimpleName())
                         {
                             case "Integer":
-                                return builder.between(root.<Integer>get(field),(Integer) value, (Integer)toValue);
+                                return builder.between(p.<Integer>get(field), (Integer) value, (Integer) toValue);
                             case "Long":
-                                return builder.between(root.<Long>get(field),(Long) value, (Long)toValue);
+                                return builder.between(p.<Long>get(field), (Long) value, (Long) toValue);
                             case "Double":
-                                return builder.between(root.<Double>get(field),(Double) value, (Double)toValue);
+                                return builder.between(p.<Double>get(field), (Double) value, (Double) toValue);
                             case "BigDecimal":
-                                return builder.between(root.<BigDecimal>get(field),(BigDecimal) value, (BigDecimal)toValue);
+                                return builder.between(p.<BigDecimal>get(field), (BigDecimal) value, (BigDecimal) toValue);
                             case "String":
-                                return builder.between(root.<String>get(field),(String) value, (String)toValue);
+                                return builder.between(p.<String>get(field), (String) value, (String) toValue);
                             default:
                                 break;
                         }
-                            
+
                     }
 
             }
@@ -231,7 +247,7 @@ public class GenericJsqlSpecification<T, V> implements Specification<T>
     }
 
 
-    private boolean checkIfDate(Root<T> root)
+    private boolean checkIfDate(Path<T> root)
     {
         final Class<? extends Object> type = root.get(field).getJavaType();
 
