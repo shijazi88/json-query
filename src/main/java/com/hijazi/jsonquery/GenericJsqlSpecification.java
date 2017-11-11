@@ -3,6 +3,7 @@ package com.hijazi.jsonquery;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -147,20 +148,13 @@ public class GenericJsqlSpecification<T, V> implements Specification<T>
                     if (checkIfDate(p))
                     {
                         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-                        return p.<Date>get(field).in(((List) value).stream().map(x ->
-
+                        List<Date> dates = new ArrayList<Date>();
+                        List<String> dateStrings = ((List) value);
+                        for (String x : dateStrings)
                         {
-                            try
-                            {
-                                return formatter.parse(x.toString());
-                            }
-                            catch (ParseException e)
-                            {
-                                e.printStackTrace();
-                            }
-                            return null;
-                        }).collect(Collectors.toList()));
-
+                            dates.add(formatter.parse(x.toString()));
+                        }
+                        return p.<Date>get(field).in(dates);
                     }
                     else
                     {
@@ -177,38 +171,32 @@ public class GenericJsqlSpecification<T, V> implements Specification<T>
                                 return p.<BigDecimal>get(field).in((List<BigDecimal>) value);
                             case "String":
                                 return p.in(value);
-
                         }
                     }
 
                 case IS_NULL:
-                    System.out.println(field);
                     return p.isNull();
                 case IS_NOT_NULL:
                     return p.isNotNull();
+                case LIKE:
+                    return builder.like(p.<String>get(field), value.toString().replace('*', '%'));
+                case NOT_LIKE:
+                    return builder.notLike(p.<String>get(field), value.toString().replace('*', '%'));
                 case NOT_IN:
                     if (checkIfDate(p))
                     {
                         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-                        return builder.not(p.<Date>get(field).in(((List) value).stream().map(x ->
-
+                        List<Date> dates = new ArrayList<Date>();
+                        List<String> dateStrings = ((List) value);
+                        for (String x : dateStrings)
                         {
-                            try
-                            {
-                                return formatter.parse(x.toString());
-                            }
-                            catch (ParseException e)
-                            {
-                                e.printStackTrace();
-                            }
-                            return null;
-                        }).collect(Collectors.toList())));
-
+                            dates.add(formatter.parse(x.toString()));
+                        }
+                        return builder.not(p.<Date>get(field).in(dates));
                     }
                     else
                     {
                         return builder.not(p.in(value));
-
                     }
                 case BETWEEN:
                     if (checkIfDate(p))
