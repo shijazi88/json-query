@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.domain.Specifications;
 
+
 public class GenericJsqlSpecBuilder<T, V>
 {
 

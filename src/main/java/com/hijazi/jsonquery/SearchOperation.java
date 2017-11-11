@@ -5,13 +5,14 @@ public enum SearchOperation
 {
     IS_NULL("isNull","null"),    
     LIKE("LIKE", ":"),
+    NOT_LIKE("NOT_LIKE", "!:"),
     EQUAL("=", "=="), 
     NOT_EQUAL("!=", "<>"), GREATER_THAN(">", "gt"),
     GREATER_THAN_OR_EQUAL(">=", "gt="), LESS_THAN("<", "lt"),
     LESS_THAN_OR_EQUAL("<=", "lt="),
     AND("and", "&"), OR("or", "|"), IN("in"), NOT_IN("out"), 
     BETWEEN("BETWEEN"), 
-     IS_NOT_NULL("notNull","not_null");
+    IS_NOT_NULL("notNull","not_null");
 
     private String value;
     

@@ -12,7 +12,7 @@ public class CustomJsqlVisitor<T,V>
         builder = new GenericJsqlSpecBuilder<T,V>();
     }
 
-    public Specification<T> visit(JsonQuery node)
+    public Specification<T> visit(JsonQuery<V> node)
     {
         return builder.createSpecification(node);
     }
