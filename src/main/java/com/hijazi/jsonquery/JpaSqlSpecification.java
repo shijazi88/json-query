@@ -6,28 +6,25 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
-
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-
 import org.springframework.data.jpa.domain.Specification;
 
-public class GenericJsqlSpecification<T, V> implements Specification<T>
+public class JpaSqlSpecification<T> implements Specification<T>
 {
 
     private String field;
     private String dateFormat;
     private SearchOperation operator;
-    private V value;
-    private V toValue;
+    private Object value;
+    private Object toValue;
 
 
-    public GenericJsqlSpecification(
-        String field, SearchOperation operator, V value, String dateFormat)
+    public JpaSqlSpecification(
+        String field, SearchOperation operator, Object value, String dateFormat)
     {
         super();
         this.dateFormat = dateFormat;
@@ -37,8 +34,8 @@ public class GenericJsqlSpecification<T, V> implements Specification<T>
     }
 
 
-    public GenericJsqlSpecification(
-        String field, SearchOperation operator, V value, V toValue, String dateFormat)
+    public JpaSqlSpecification(
+        String field, SearchOperation operator, Object value, Object toValue, String dateFormat)
     {
         super();
         this.dateFormat = dateFormat;
@@ -198,6 +195,14 @@ public class GenericJsqlSpecification<T, V> implements Specification<T>
                     {
                         return builder.not(p.in(value));
                     }
+                    
+                case STARTS_WITH:
+                    return builder.like(p.<String>get(field), value.toString() + "%");
+                case ENDS_WITH:
+                    return builder.like(p.<String>get(field),"%"+ value.toString() );
+                case CONTAINS:
+                    return builder.like(p.<String>get(field),"%"+ value.toString()+"%");
+
                 case BETWEEN:
                     if (checkIfDate(p))
                     {

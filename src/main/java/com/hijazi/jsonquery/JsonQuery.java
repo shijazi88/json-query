@@ -2,27 +2,26 @@ package com.hijazi.jsonquery;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.hijazi.jsonquery.exceptions.QueryNotValid;
 
 @JsonInclude(value = Include.NON_NULL)
-public class JsonQuery<V>
+public class JsonQuery
 {
     String field;
     private SearchOperation operator;
 
-    private V value;
+    private Object value;
 
-    private V toValue;
+    private Object toValue;
 
     private String dateFormat;
 
-    private boolean leaf;
-    private List<JsonQuery<V>> conditions;
+    private List<JsonQuery> conditions;
 
 
-    public V getToValue()
+    public Object getToValue()
     {
         return toValue;
     }
@@ -46,36 +45,117 @@ public class JsonQuery<V>
     }
 
 
-    public V getValue()
+    public Object getValue()
     {
         return value;
     }
 
-
-    public boolean isLeaf()
+     String toSql() throws QueryNotValid
     {
-        return leaf;
+        if(! this.validate()){
+            throw new QueryNotValid();
+        }
+        String query= "Select * from Table where ";
+        query+= generateWhere(this);
+        return query;
+    }
+    
+    private String generateWhere(JsonQuery query){
+        
+        
+        if(query.getOperator().isLogicaloperator())
+        {
+            String result="";
+            int i=0;
+            for (JsonQuery jsonQuery : query.getconditions())
+            {
+                if(i==0)
+                {
+                    result+= " ( " + generateWhere(jsonQuery) + " ) ";
+
+                }
+                else
+                {
+                    result+= query.getOperator().getValue() +"  ( " + generateWhere(jsonQuery) + " ) ";
+                    
+                }
+                i++;
+            }
+            return result;
+        }
+        else
+        {
+            if(query.getOperator() == SearchOperation.BETWEEN )
+            {
+                return "( " + query.getField() + " " + query.getOperator().getValue() +  " '" + query.getValue() + "' AND '"+ query.getToValue() + "' ) ";
+            }
+            else
+            {
+                return query.getField() + " " + query.getOperator().getValue() +  " " + query.getValue()  ;
+            }
+        }
+    }
+    
+    public boolean validate(){
+        
+        if(this.getOperator() == null)
+        {
+            return false;
+        }
+        
+        
+        if(!this.getOperator().isLogicaloperator())
+        {
+            if(this.getField() == null)
+            {
+                return false;
+            }
+            
+            if(!this.getOperator().needValue() && this.getValue() == null)
+            {
+                return false;
+            }
+            
+            
+            if(this.getOperator() == SearchOperation.BETWEEN && this.getToValue() == null)
+            {
+                return false;
+            }
+        }
+        else
+        {
+           if(this.getconditions() == null || this.getconditions().size() == 0)
+           {
+               return false;
+           }
+           else
+           {
+               for (JsonQuery jsonQuery : this.getconditions())
+                {
+                    if(!jsonQuery.validate())
+                    {
+                        return false;
+                    }
+                }
+           }
+        }
+        return true;
     }
 
-
-    public List<JsonQuery<V>> getconditions()
+    public List<JsonQuery> getconditions()
     {
         return conditions;
     }
 
-
-    @Generated("SparkVools")
-    private JsonQuery(Builder<V> builder)
+    private JsonQuery(Builder builder)
     {
         this.field = builder.field;
         this.operator = builder.operator;
         this.value = builder.value;
         this.toValue = builder.toValue;
-        this.leaf = builder.leaf;
         this.dateFormat = builder.dateFormat;
         this.conditions = builder.conditions;
     }
-
 
     public JsonQuery()
     {}
@@ -85,7 +165,6 @@ public class JsonQuery<V>
      * Creates builder to build {@link Node}.
      * @return created builder
      */
-    @Generated("SparkVools")
     public static Builder builder()
     {
         return new Builder();
@@ -94,148 +173,141 @@ public class JsonQuery<V>
     /**
      * Builder to build {@link Node}.
      */
-    @Generated("SparkVools")
-    public static final class Builder<V>
+    public static final class Builder
     {
         private String field;
         private SearchOperation operator;
-        private V value;
-        private V toValue;
-        private boolean leaf;
+        private Object value;
+        private Object toValue;
         private String dateFormat;
-        private List<JsonQuery<V>> conditions = new ArrayList<JsonQuery<V>>();
+        private List<JsonQuery> conditions = new ArrayList<JsonQuery>();
 
 
         private Builder()
         {}
 
 
-        public Builder<V> withField(String field)
+        public Builder withField(String field)
         {
             this.field = field;
             return this;
         }
 
 
-        public Builder<V> withDateFormat(String dateFormat)
+        public Builder withDateFormat(String dateFormat)
         {
             this.dateFormat = dateFormat;
             return this;
         }
 
 
-        public Builder<V> withOperator(SearchOperation operator)
+        public Builder withOperator(SearchOperation operator)
         {
             this.operator = operator;
             return this;
         }
 
 
-        public Builder<V> and()
+        public Builder and()
         {
             this.operator = SearchOperation.AND;
             return this;
         }
 
 
-        public Builder<V> or()
+        public Builder or()
         {
             this.operator = SearchOperation.OR;
             return this;
         }
 
 
-        public Builder<V> like()
+        public Builder like()
         {
             this.operator = SearchOperation.LIKE;
             return this;
         }
 
 
-        public Builder<V> greaterVhank()
+        public Builder greaterVhank()
         {
             this.operator = SearchOperation.GREATER_THAN;
             return this;
         }
 
 
-        public Builder<V> lessVhan()
+        public Builder lessVhan()
         {
             this.operator = SearchOperation.LESS_THAN;
             return this;
         }
 
 
-        public Builder<V> equal()
+        public Builder equal()
         {
             this.operator = SearchOperation.EQUAL;
             return this;
         }
 
 
-        public Builder<V> withValue(V value)
+        public Builder withValue(Object value)
         {
             this.value = value;
             return this;
         }
 
 
-        public Builder<V> withToValue(V toValue)
+        public Builder withToValue(Object toValue)
         {
             this.toValue = toValue;
             return this;
         }
 
 
-        public Builder<V> withLeaf(boolean leaf)
-        {
-            this.leaf = leaf;
-            return this;
-        }
 
 
-        public Builder<V> withConditions(List<JsonQuery<V>> conditions)
+        public Builder withConditions(List<JsonQuery> conditions)
         {
             this.conditions = conditions;
             return this;
         }
 
 
-        public Builder<V> addCondition(JsonQuery<V> condition)
+        public Builder addCondition(JsonQuery condition)
         {
             if (this.conditions == null)
-                this.conditions = new ArrayList<JsonQuery<V>>();
+                this.conditions = new ArrayList<JsonQuery>();
             this.conditions.add(condition);
             return this;
         }
 
 
-        public Builder<V> addDateCondition(String field, V value, SearchOperation operator, String dateFormat)
+        public Builder addDateCondition(String field, Object value, SearchOperation operator, String dateFormat)
         {
             if (this.conditions == null)
-                this.conditions = new ArrayList<JsonQuery<V>>();
+                this.conditions = new ArrayList<JsonQuery>();
 
-            JsonQuery<V> condition =
-                JsonQuery.builder().withConditions(null).withLeaf(true).withField(field).withValue(value).withOperator(operator).withDateFormat(dateFormat).build();
+            JsonQuery condition =
+                JsonQuery.builder().withConditions(null).withField(field).withValue(value).withOperator(operator).withDateFormat(dateFormat).build();
             this.conditions.add(condition);
             return this;
         }
 
 
-        public Builder<V> addSimpleCondition(String field, V value, SearchOperation operator)
+        public Builder addSimpleCondition(String field, Object value, SearchOperation operator)
         {
             if (this.conditions == null)
-                this.conditions = new ArrayList<JsonQuery<V>>();
+                this.conditions = new ArrayList<JsonQuery>();
 
-            JsonQuery<V> condition = JsonQuery.builder().withConditions(null).withLeaf(true).withField(field).withValue(value).withOperator(operator).build();
+            JsonQuery condition = JsonQuery.builder().withConditions(null).withField(field).withValue(value).withOperator(operator).build();
             this.conditions.add(condition);
             return this;
         }
 
 
-        public JsonQuery<V> build()
+        public JsonQuery build()
         {
-            return new JsonQuery<V>(this);
+            return new JsonQuery(this);
         }
     }
 
