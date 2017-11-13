@@ -11,11 +11,12 @@ public enum SearchOperation
     NOT_EQUAL("!=", "<>"), GREATER_THAN(">", "gt"),
     GREATER_THAN_OR_EQUAL(">=", "gt="), LESS_THAN("<", "lt"),
     LESS_THAN_OR_EQUAL("<=", "lt="),
-    AND("and", "&"), OR("or", "|"), IN("in"), NOT_IN("out"),
+    AND("and", "&"), OR("or", "|"), 
+    IN("in"), NOT_IN("out"),
     BETWEEN("BETWEEN"),
-    STARTS_WITH("STARTS_WITH"),
-    ENDS_WITH("ENDS_WITH"),
-    CONTAINS("CONTAINS"),
+    STARTS_WITH("starts"),
+    ENDS_WITH("ends"),
+    CONTAINS("contains"),
     IS_NOT_NULL("notNull", "not_null");
 
     private String value;
